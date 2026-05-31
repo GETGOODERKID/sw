@@ -47,78 +47,101 @@
 
 <body>
 
-  <!-- 🔧 FIX 1: Fake ad system (prevents crashes) -->
-  <script>
-    window.showInterstitialAd = () => Promise.resolve();
-    window.showRewardedAd = () => Promise.resolve(true);
+<!-- 🔧 FAKE MSSTART / CRAZYGAMES SDK (OPTION 2 FIX) -->
+<script>
+  console.log("SDK stub initialized");
 
-    window.ShowInterstitialAdProvider = {
-      ShowInterstitialAd: () => Promise.resolve()
-    };
-
-    window.ShowRewardedAdProvider = {
-      ShowRewardedAd: () => Promise.resolve(true)
-    };
-  </script>
-
-  <!-- 🔧 FIX 2: Audio unlock for Unity WebGL -->
-  <script>
-    function unlockAudio() {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContext) return;
-
-      const ctx = new AudioContext();
-      if (ctx.state === "suspended") {
-        ctx.resume();
-      }
-    }
-
-    window.addEventListener("click", unlockAudio);
-    window.addEventListener("touchstart", unlockAudio);
-    window.addEventListener("keydown", unlockAudio);
-  </script>
-
-  <div id="unity-container">
-    <canvas id="unity-canvas" tabindex="0"></canvas>
-  </div>
-
-  <div id="loading">Loading Unity WebGL...</div>
-
-  <script>
-    const canvas = document.getElementById("unity-canvas");
-    const loading = document.getElementById("loading");
-
-    const loaderUrl = "dae5c7bd2b15915f51ae4e56b8f5367d.loader.js";
-
-    const config = {
-      dataUrl: "568ea6b3af616bd57f419c508c933303.data.unityweb",
-      frameworkUrl: "c699bc4c24abfbdb4c8b3e15b0af7d3f.framework.js.unityweb",
-      codeUrl: "7fb5141de5923189bc1dc5f94eb619f2.wasm.unityweb",
-      streamingAssetsUrl: "StreamingAssets",
-      companyName: "Unity",
-      productName: "WebGL Game",
-      productVersion: "1.0",
-      matchWebGLToCanvasSize: true
-    };
-
-    let script = document.createElement("script");
-    script.src = loaderUrl;
-
-    script.onload = () => {
-      createUnityInstance(canvas, config, (progress) => {
-        console.log("Loading:", Math.round(progress * 100) + "%");
-      }).then((unityInstance) => {
-        loading.style.display = "none";
-        canvas.focus();
-        console.log("Unity loaded successfully");
-      }).catch((err) => {
-        console.error(err);
-        loading.innerText = "Failed to load game. Check console.";
+  // Main MSStart mock
+  window.msstart = {
+    loadAdsAsync: (isRewarded) => {
+      console.log("loadAdsAsync called", isRewarded);
+      return Promise.resolve({
+        instanceId: "fake-instance",
       });
-    };
+    },
 
-    document.body.appendChild(script);
-  </script>
+    showAdsAsync: (id) => {
+      console.log("showAdsAsync called", id);
+      return Promise.resolve({
+        showAdsCompletedAsync: Promise.resolve()
+      });
+    }
+  };
+
+  window.$msstart = window.msstart;
+
+  // Direct ad functions
+  window.showInterstitialAd = function () {
+    console.log("Interstitial ad stub");
+    return Promise.resolve();
+  };
+
+  window.showRewardedAd = function () {
+    console.log("Rewarded ad stub");
+    return Promise.resolve(true);
+  };
+
+  // Provider-style API
+  window.ShowInterstitialAdProvider = {
+    ShowInterstitialAd: function () {
+      console.log("Provider interstitial stub");
+      return Promise.resolve();
+    }
+  };
+
+  window.ShowRewardedAdProvider = {
+    ShowRewardedAd: function () {
+      console.log("Provider rewarded stub");
+      return Promise.resolve(true);
+    }
+  };
+
+  // Force "SDK ready" flags (important for some builds)
+  window.adInitialized = true;
+  window.sdkInitialized = true;
+</script>
+
+<div id="unity-container">
+  <canvas id="unity-canvas" tabindex="0"></canvas>
+</div>
+
+<div id="loading">Loading Unity WebGL...</div>
+
+<script>
+  const canvas = document.getElementById("unity-canvas");
+  const loading = document.getElementById("loading");
+
+  const loaderUrl = "dae5c7bd2b15915f51ae4e56b8f5367d.loader.js";
+
+  const config = {
+    dataUrl: "568ea6b3af616bd57f419c508c933303.data.unityweb",
+    frameworkUrl: "c699bc4c24abfbdb4c8b3e15b0af7d3f.framework.js.unityweb",
+    codeUrl: "7fb5141de5923189bc1dc5f94eb619f2.wasm.unityweb",
+    streamingAssetsUrl: "StreamingAssets",
+    companyName: "Unity",
+    productName: "WebGL Game",
+    productVersion: "1.0",
+    matchWebGLToCanvasSize: true
+  };
+
+  let script = document.createElement("script");
+  script.src = loaderUrl;
+
+  script.onload = () => {
+    createUnityInstance(canvas, config, (progress) => {
+      console.log("Loading:", Math.round(progress * 100) + "%");
+    }).then((unityInstance) => {
+      loading.style.display = "none";
+      canvas.focus();
+      console.log("Unity loaded successfully");
+    }).catch((err) => {
+      console.error(err);
+      loading.innerText = "Failed to load game. Check console.";
+    });
+  };
+
+  document.body.appendChild(script);
+</script>
 
 </body>
 </html>
