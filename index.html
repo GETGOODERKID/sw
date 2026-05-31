@@ -46,20 +46,33 @@
 
 <body>
 
-  <!-- 🔧 FIX: fake ad functions to stop crash -->
+  <!-- 🔧 FULL AD STUB SYSTEM -->
   <script>
-    function showInterstitialAd() {
-      console.log("Interstitial ad stub");
+    // Direct calls
+    window.showInterstitialAd = function () {
+      console.log("showInterstitialAd stub");
       return Promise.resolve();
-    }
+    };
 
-    function showRewardedAd() {
-      console.log("Rewarded ad stub");
+    window.showRewardedAd = function () {
+      console.log("showRewardedAd stub");
       return Promise.resolve(true);
-    }
+    };
 
-    window.showInterstitialAd = showInterstitialAd;
-    window.showRewardedAd = showRewardedAd;
+    // Provider-style calls (this is what your error suggests)
+    window.ShowInterstitialAdProvider = {
+      ShowInterstitialAd: function () {
+        console.log("Provider ShowInterstitialAd stub");
+        return Promise.resolve();
+      }
+    };
+
+    window.ShowRewardedAdProvider = {
+      ShowRewardedAd: function () {
+        console.log("Provider ShowRewardedAd stub");
+        return Promise.resolve(true);
+      }
+    };
   </script>
 
   <div id="unity-container">
