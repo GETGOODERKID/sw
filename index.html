@@ -46,6 +46,22 @@
 
 <body>
 
+  <!-- 🔧 FIX: fake ad functions to stop crash -->
+  <script>
+    function showInterstitialAd() {
+      console.log("Interstitial ad stub");
+      return Promise.resolve();
+    }
+
+    function showRewardedAd() {
+      console.log("Rewarded ad stub");
+      return Promise.resolve(true);
+    }
+
+    window.showInterstitialAd = showInterstitialAd;
+    window.showRewardedAd = showRewardedAd;
+  </script>
+
   <div id="unity-container">
     <canvas id="unity-canvas"></canvas>
   </div>
