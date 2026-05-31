@@ -40,43 +40,46 @@
       justify-content: center;
       font-family: sans-serif;
       font-size: 18px;
+      z-index: 10;
     }
   </style>
 </head>
 
 <body>
 
-  <!-- 🔧 FULL AD STUB SYSTEM -->
+  <!-- 🔧 FIX 1: Fake ad system (prevents crashes) -->
   <script>
-    // Direct calls
-    window.showInterstitialAd = function () {
-      console.log("showInterstitialAd stub");
-      return Promise.resolve();
-    };
+    window.showInterstitialAd = () => Promise.resolve();
+    window.showRewardedAd = () => Promise.resolve(true);
 
-    window.showRewardedAd = function () {
-      console.log("showRewardedAd stub");
-      return Promise.resolve(true);
-    };
-
-    // Provider-style calls (this is what your error suggests)
     window.ShowInterstitialAdProvider = {
-      ShowInterstitialAd: function () {
-        console.log("Provider ShowInterstitialAd stub");
-        return Promise.resolve();
-      }
+      ShowInterstitialAd: () => Promise.resolve()
     };
 
     window.ShowRewardedAdProvider = {
-      ShowRewardedAd: function () {
-        console.log("Provider ShowRewardedAd stub");
-        return Promise.resolve(true);
-      }
+      ShowRewardedAd: () => Promise.resolve(true)
     };
   </script>
 
+  <!-- 🔧 FIX 2: Audio unlock for Unity WebGL -->
+  <script>
+    function unlockAudio() {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+
+      const ctx = new AudioContext();
+      if (ctx.state === "suspended") {
+        ctx.resume();
+      }
+    }
+
+    window.addEventListener("click", unlockAudio);
+    window.addEventListener("touchstart", unlockAudio);
+    window.addEventListener("keydown", unlockAudio);
+  </script>
+
   <div id="unity-container">
-    <canvas id="unity-canvas"></canvas>
+    <canvas id="unity-canvas" tabindex="0"></canvas>
   </div>
 
   <div id="loading">Loading Unity WebGL...</div>
@@ -106,6 +109,7 @@
         console.log("Loading:", Math.round(progress * 100) + "%");
       }).then((unityInstance) => {
         loading.style.display = "none";
+        canvas.focus();
         console.log("Unity loaded successfully");
       }).catch((err) => {
         console.error(err);
